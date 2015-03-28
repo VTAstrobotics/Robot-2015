@@ -31,16 +31,30 @@ NetComm::~NetComm() {
 }
 
 bool NetComm::getData(ControlData* data) {
-    int size = sizeof(ControlData);
-    bzero(data, size);
-    int len = recvfrom(recvSock, data, size, 0, NULL, NULL);
+    CommData rawData;
+    int size = sizeof(CommData);
+    bzero(data, sizeof(ControlData));
+    bzero(&rawData, size);
+    int len = recvfrom(recvSock, &rawData, size, 0, NULL, NULL);
     if (len < size) {
         return false;
     }
-    unsigned short crc16Check = crc16((unsigned char*) data,
-            sizeof(ControlData) - sizeof(unsigned short));
-    if(crc16Check != data->crc16) {
+    unsigned short crc16Check = crc16((unsigned char*) &rawData,
+            sizeof(CommData) - sizeof(unsigned short));
+    if(crc16Check != rawData.crc16) {
         return false;
+    }
+    data->id = rawData.id;
+    data->val = rawData.val;
+    unsigned int dpad = rawData.val;
+    if(dpad & (1<<6)) {
+        data->dpadY = 1;
+    } else if(dpad & (1<<4)) {
+        data->dpadY = -1;
+    } else if(dpad & (1<<2)) {
+        data->dpadX = 1;
+    } else if(dpad & 1) {
+        data->dpadX = -1;
     }
     return true;
 }

@@ -1,39 +1,50 @@
 #include "NetComm.h"
 #include "crc-16.h"
+#include <Wire.h>
 
-const int LOOP_HZ = 10;
+const int LOOP_HZ = 50;
 const int LOOP_DELAY = (int) (1000 / LOOP_HZ);
 
 NetComm comm;
 ControlData control;
-
-void updateState() {
-    ControlData data;
-    if(comm.getData(&data)) {
-        memcpy(&control, &data, 3);
-    }
-}
+int speedL = 90;
+int speedR = 90;
 
 void printData(ControlData& data) {
     char out[64];
-    sprintf(out, "Fwd:%d Rev:%d Left:%d Right:%d", data.forward, data.reverse,
-            data.left, data.right);
+    if(data.id == 17) {
+        sprintf(out, "DPAD, Y: %d, X: %d", data.dpadY, data.dpadX);
+    } else {
+        sprintf(out, "Data update, id: %d, value: %d", data.id, data.val);
+    }
     Serial.println(out);
+}
+
+void motorControl(ControlData& data) {
+    if(data.id == 1) {
+        speedL = data.val;
+    } else if(data.id == 3) {
+        speedR = data.val;
+    } else {
+        return;
+    }
+    byte speed[] = {speedL, speedL, speedR, speedR};
+    Wire.beginTransmission(1);
+    Wire.write(speed, 4);
+    Wire.endTransmission();
 }
 
 void setup() {
     Serial.begin(9600);
+    Wire.begin();
     // Initialize default values for control
     bzero(&control, sizeof(control));
-    control.isTeleop = false;
 }
 
 void loop() {
-    updateState();
-    if(control.isTeleop) {
-        printData(control);
+    if(comm.getData(&control)) {
+        motorControl(control);
     } else {
-        Serial.println("Autonomous");
+        delay(LOOP_DELAY);
     }
-    delay(LOOP_DELAY);
 }
