@@ -1,4 +1,5 @@
 #include "NetComm.h"
+#include "constants.h"
 #include "crc-16.h"
 #include <Wire.h>
 
@@ -21,13 +22,15 @@ void printData(ControlData& data) {
 }
 
 void motorControl(ControlData& data) {
-    if(data.id == 1) {
+    // Update state
+    if(data.id == DRIVE_LEFT) {
         speedL = data.val;
-    } else if(data.id == 3) {
+    } else if(data.id == DRIVE_LEFT) {
         speedR = data.val;
     } else {
         return;
     }
+    // Send state to motor slaves
     byte speed[] = {speedL, speedL, speedR, speedR};
     Wire.beginTransmission(1);
     Wire.write(speed, 4);
