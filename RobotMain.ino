@@ -33,7 +33,7 @@ void motorControl(ControlData& data) {
     // Send state to motor slaves
     byte speed[] = {speedL, speedL, speedR, speedR};
     Wire.beginTransmission(1);
-    Wire.write(speed, 4);
+    Wire.write(speed, ADDR_DRIVE_SLAVE);
     Wire.endTransmission();
 
     char out[64];
