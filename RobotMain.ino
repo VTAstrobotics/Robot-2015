@@ -10,6 +10,7 @@ NetComm comm;
 ControlData control;
 int speedL = 90;
 int speedR = 90;
+int speedDrum = 90;
 
 void printData(ControlData& data) {
     char out[64];
@@ -23,21 +24,27 @@ void printData(ControlData& data) {
 
 void motorControl(ControlData& data) {
     // Update state
-    if(data.id == DRIVE_LEFT) {
+    if(data.id == DRIVE_LEFT) { // Drivetrain
         speedL = data.val;
     } else if(data.id == DRIVE_RIGHT) {
         speedR = data.val;
+    } else if(data.id == DIG) { // Drum control
+        // Assuming this one is 90-180 and dump is 90-0
+        speedDrum = data.val;
+    } else if(data.id == DUMP) {
+        speedDrum = -data.val + 180;
     } else {
         return;
     }
+
     // Send state to motor slaves
-    byte speed[] = {speedL, speedL, speedR, speedR};
+    byte speed[] = { speedL, speedL, speedR, speedR };
     Wire.beginTransmission(1);
     Wire.write(speed, ADDR_DRIVE_SLAVE);
     Wire.endTransmission();
 
     char out[64];
-    sprintf(out, "Drive left: %d, right: %d", speedL, speedR);
+    sprintf(out, "Drive left: %d, right: %d, Drum speed: %d", speedL, speedR, speedDrum);
     Serial.println(out);
 }
 
