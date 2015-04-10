@@ -25,7 +25,7 @@ void motorControl(ControlData& data) {
     // Update state
     if(data.id == DRIVE_LEFT) {
         speedL = data.val;
-    } else if(data.id == DRIVE_LEFT) {
+    } else if(data.id == DRIVE_RIGHT) {
         speedR = data.val;
     } else {
         return;
@@ -35,6 +35,10 @@ void motorControl(ControlData& data) {
     Wire.beginTransmission(1);
     Wire.write(speed, 4);
     Wire.endTransmission();
+
+    char out[64];
+    sprintf(out, "Drive left: %d, right: %d", speedL, speedR);
+    Serial.println(out);
 }
 
 void setup() {
