@@ -44,6 +44,7 @@ void setup() {
 void loop() {
     if(comm.getData(&control)) {
         motorControl(control);
+        printData(control);
     } else {
         delay(LOOP_DELAY);
     }
