@@ -40,7 +40,7 @@ static const int DRIVE_RIGHT_STOP = RIGHTTHUMB;
 static const int KILL_ALL = BACK;
 
 // I2C addresses
-static const int ADDR_DRIVE_SLAVE = 4;
+static const int ADDR_DRIVE_SLAVE = 1;
 static const int ADDR_DRUM_SLAVE = 2;
 
 #endif /* CONSTANTS_H_ */

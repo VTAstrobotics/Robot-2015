@@ -2,9 +2,11 @@
 #include "constants.h"
 #include "crc-16.h"
 #include <Wire.h>
+#include <Arduino.h>
 
 const int LOOP_HZ = 50;
 const int LOOP_DELAY = (int) (1000 / LOOP_HZ);
+const int READY_LED = 13;
 
 NetComm comm;
 ControlData control;
@@ -39,8 +41,8 @@ void motorControl(ControlData& data) {
 
     // Send state to motor slaves
     byte speed[] = { speedL, speedL, speedR, speedR };
-    Wire.beginTransmission(1);
-    Wire.write(speed, ADDR_DRIVE_SLAVE);
+    Wire.beginTransmission(ADDR_DRIVE_SLAVE);
+    Wire.write(speed, 4);
     Wire.endTransmission();
 
     char out[64];
@@ -53,6 +55,9 @@ void setup() {
     Wire.begin();
     // Initialize default values for control
     bzero(&control, sizeof(control));
+    // Activate LED to indicate readiness
+    pinMode(READY_LED, OUTPUT);
+    digitalWrite(READY_LED, HIGH);
 }
 
 void loop() {
