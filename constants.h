@@ -8,6 +8,12 @@
 #ifndef CONSTANTS_H_
 #define CONSTANTS_H_
 
+// Motor values
+static const int SPEED_ACTUATOR1_UP = 30;
+static const int SPEED_ACTUATOR1_DOWN = 150;
+static const int SPEED_ACTUATOR2_UP = 30;
+static const int SPEED_ACTUATOR2_DOWN = 150;
+
 // Xbox controller IDs
 static const int LTHUMBX = 0;
 static const int LTHUMBY = 1;
@@ -37,6 +43,8 @@ static const int DUMP = LTRIGGER;
 // Buttons
 static const int DRIVE_LEFT_STOP = LEFTTHUMB;
 static const int DRIVE_RIGHT_STOP = RIGHTTHUMB;
+static const int ACTUATOR_UP = Y;
+static const int ACTUATOR_DOWN = A;
 static const int KILL_ALL = BACK;
 
 // I2C addresses

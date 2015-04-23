@@ -13,6 +13,8 @@ ControlData control;
 int speedL = 90;
 int speedR = 90;
 int speedDrum = 90;
+int speedActuator1 = 90;
+int speedActuator2 = 90;
 
 void printData(ControlData& data) {
     char out[64];
@@ -35,14 +37,28 @@ void motorControl(ControlData& data) {
         speedDrum = data.val;
     } else if(data.id == DUMP) {
         speedDrum = -data.val + 180;
-    } else {
-        return;
+    } else if(data.id == ACTUATOR_UP || data.id == ACTUATOR_DOWN) { // Actuator control
+        if(data.val == 0) { // Stopped pressing button
+            speedActuator1 = 90;
+            speedActuator2 = 90;
+        } else if(data.id == ACTUATOR_UP) {
+            speedActuator1 = SPEED_ACTUATOR1_UP;
+            speedActuator2 = SPEED_ACTUATOR2_UP;
+        } else if(data.id == ACTUATOR_DOWN) {
+            speedActuator1 = SPEED_ACTUATOR1_DOWN;
+            speedActuator2 = SPEED_ACTUATOR2_DOWN;
+        }
     }
 
     // Send state to motor slaves
     byte speed[] = { speedL, speedL, speedR, speedR };
     Wire.beginTransmission(ADDR_DRIVE_SLAVE);
     Wire.write(speed, 4);
+    Wire.endTransmission();
+
+    byte drum[] = {0, speedDrum, speedActuator1, speedActuator2};
+    Wire.beginTransmission(ADDR_DRUM_SLAVE);
+    Wire.write(drum, 4);
     Wire.endTransmission();
 
     char out[64];
