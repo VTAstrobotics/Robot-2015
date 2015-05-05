@@ -7,6 +7,7 @@
 const int LOOP_HZ = 50;
 const int LOOP_DELAY = (int) (1000 / LOOP_HZ);
 const int READY_LED = 13;
+const int ACTIVE_LED = 12;
 
 NetComm comm;
 ControlData control;
@@ -28,8 +29,10 @@ void printData(ControlData& data) {
 }
 
 void killMotors() {
-    speedL = speedR = speedDrum =  speedActuator1 = speedActuator2 = 90;
-    byte speed[] = { 0, 0, 0, 0 };
+    speedL = speedR = speedDrum = speedActuator1 = speedActuator2 = 90;
+    sendDrive = sendDrum = false;
+
+    byte speed[] = { 90, 90, 90, 90 };
 
     Wire.beginTransmission(ADDR_DRIVE_SLAVE);
     Wire.write(speed, 4);
@@ -42,9 +45,10 @@ void killMotors() {
 
 void motorControl(ControlData& data) {
     // Update state
-    if(data.id = DEADMAN) {
+    if(data.id == DEADMAN) {
         // Pressed = active, released = dead
         dead = !data.val;
+        digitalWrite(ACTIVE_LED, data.val);
         if(dead) {
             killMotors();
         }
@@ -103,14 +107,20 @@ void setup() {
     bzero(&control, sizeof(control));
     // Activate LED to indicate readiness
     pinMode(READY_LED, OUTPUT);
+    pinMode(ACTIVE_LED, OUTPUT);
     digitalWrite(READY_LED, HIGH);
 }
 
 void loop() {
     if(comm.getData(&control)) {
-        printData(control);
+        if(!dead) {
+            printData(control);
+        }
         motorControl(control);
     } else {
+        if(dead) {
+            Serial.println("dead");
+        }
         delay(LOOP_DELAY);
     }
 }
