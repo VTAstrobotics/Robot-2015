@@ -46,6 +46,7 @@ static const int DRIVE_RIGHT_STOP = RIGHTTHUMB;
 static const int ACTUATOR_UP = Y;
 static const int ACTUATOR_DOWN = A;
 static const int KILL_ALL = BACK;
+static const int DEADMAN = RB;
 
 // I2C addresses
 static const int ADDR_DRIVE_SLAVE = 1;

@@ -15,6 +15,7 @@ int speedR = 90;
 int speedDrum = 90;
 int speedActuator1 = 90;
 int speedActuator2 = 90;
+bool dead = true;
 
 void printData(ControlData& data) {
     char out[64];
@@ -26,8 +27,31 @@ void printData(ControlData& data) {
     Serial.println(out);
 }
 
+void killMotors() {
+    speedL = speedR = speedDrum =  speedActuator1 = speedActuator2 = 90;
+    byte speed[] = { 0, 0, 0, 0 };
+
+    Wire.beginTransmission(ADDR_DRIVE_SLAVE);
+    Wire.write(speed, 4);
+    Wire.endTransmission();
+
+    Wire.beginTransmission(ADDR_DRUM_SLAVE);
+    Wire.write(speed, 4);
+    Wire.endTransmission();
+}
+
 void motorControl(ControlData& data) {
     // Update state
+    if(data.id = DEADMAN) {
+        // Pressed = active, released = dead
+        dead = !data.val;
+        if(dead) {
+            killMotors();
+        }
+    }
+    if(dead) {
+        return;
+    }
     if(data.id == DRIVE_LEFT || data.id == DRIVE_RIGHT) { //drivetrain
         if(data.id == DRIVE_LEFT) {
             speedL = data.val;
