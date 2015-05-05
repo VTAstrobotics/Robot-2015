@@ -4,6 +4,7 @@
 #include <Wire.h>
 #include <Arduino.h>
 
+const int I2C_DELAY = 5;
 const int LOOP_HZ = 50;
 const int LOOP_DELAY = (int) (1000 / LOOP_HZ);
 const int READY_LED = 13;
@@ -17,6 +18,8 @@ int speedDrum = 90;
 int speedActuator1 = 90;
 int speedActuator2 = 90;
 bool dead = true;
+bool sendDrive = false;
+bool sendDrum = false;
 
 void printData(ControlData& data) {
     char out[64];
@@ -56,17 +59,14 @@ void motorControl(ControlData& data) {
     if(dead) {
         return;
     }
+
     if(data.id == DRIVE_LEFT || data.id == DRIVE_RIGHT) { //drivetrain
         if(data.id == DRIVE_LEFT) {
             speedL = data.val;
         } else if(data.id == DRIVE_RIGHT) {
             speedR = data.val;
         }
-        // Send state to drive slave
-        byte speed[] = { speedL, speedL, speedR, speedR };
-        Wire.beginTransmission(ADDR_DRIVE_SLAVE);
-        Wire.write(speed, 4);
-        Wire.endTransmission();
+        sendDrive = true;
     }
 
     else if(data.id == DIG || data.id == DUMP || data.id == ACTUATOR_UP
@@ -88,16 +88,35 @@ void motorControl(ControlData& data) {
                 speedActuator2 = SPEED_ACTUATOR2_DOWN;
             }
         }
-        byte drum[] = { 0, speedDrum, speedActuator1, speedActuator2 };
-        Wire.beginTransmission(ADDR_DRUM_SLAVE);
-        Wire.write(drum, 4);
-        Wire.endTransmission();
+        sendDrum = true;
     }
 
     char out[64];
     sprintf(out, "Drive left: %d, right: %d, Drum speed: %d", speedL, speedR,
             speedDrum);
     Serial.println(out);
+}
+
+void sendMotorSlaves() {
+    if(sendDrive) {
+        byte speed[] = { speedL, speedL, speedR, speedR };
+        Wire.beginTransmission(ADDR_DRIVE_SLAVE);
+        Wire.write(speed, 4);
+        Wire.endTransmission();
+        sendDrive = false;
+        Serial.println("sending drive");
+    }
+
+    delay(I2C_DELAY);
+
+    if(sendDrum) {
+        byte drum[] = { 0, speedDrum, speedActuator1, speedActuator2 };
+        Wire.beginTransmission(ADDR_DRUM_SLAVE);
+        Wire.write(drum, 4);
+        Wire.endTransmission();
+        sendDrum = false;
+        Serial.println("sending drum");
+    }
 }
 
 void setup() {
@@ -112,6 +131,7 @@ void setup() {
 }
 
 void loop() {
+    sendMotorSlaves();
     if(comm.getData(&control)) {
         if(!dead) {
             printData(control);
