@@ -4,7 +4,7 @@
 #include <Wire.h>
 #include <Arduino.h>
 
-const int I2C_DELAY = 5;
+const int I2C_DELAY = 0;
 const int LOOP_HZ = 50;
 const int LOOP_DELAY = (int) (1000 / LOOP_HZ);
 const int READY_LED = 13;
@@ -97,8 +97,8 @@ void motorControl(ControlData& data) {
     Serial.println(out);
 }
 
-void sendMotorSlaves() {
-    if(sendDrive) {
+void sendMotorSlaves(bool override = false) {
+    if(sendDrive || override) {
         byte speed[] = { speedL, speedL, speedR, speedR };
         Wire.beginTransmission(ADDR_DRIVE_SLAVE);
         Wire.write(speed, 4);
@@ -109,7 +109,7 @@ void sendMotorSlaves() {
 
     delay(I2C_DELAY);
 
-    if(sendDrum) {
+    if(sendDrum || override) {
         byte drum[] = { 0, speedDrum, speedActuator1, speedActuator2 };
         Wire.beginTransmission(ADDR_DRUM_SLAVE);
         Wire.write(drum, 4);
@@ -131,15 +131,21 @@ void setup() {
 }
 
 void loop() {
-    sendMotorSlaves();
+    static bool controlIdle = true;
     if(comm.getData(&control)) {
+        controlIdle = false;
         if(!dead) {
             printData(control);
         }
         motorControl(control);
+        sendMotorSlaves();
     } else {
         if(dead) {
             Serial.println("dead");
+        }
+        if(!controlIdle) {
+            controlIdle = true;
+            sendMotorSlaves(true);
         }
         delay(LOOP_DELAY);
     }
