@@ -9,6 +9,7 @@
 #define ROBOT_2015_NETCOMM_H_
 
 #include <stdint.h>
+#include <net/if.h>
 
 const int NETCOMM_RECVPORT = 6800;
 
@@ -59,9 +60,11 @@ public:
     ~NetComm();
 
     bool getData(ControlData* data);
+    bool isNetworkUp();
 
 private:
     int recvSock;
+    ifreq ifr; // For detecting if network interface is up
 };
 
 #endif /* ROBOT_2015_NETCOMM_H_ */

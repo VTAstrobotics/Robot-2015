@@ -6,11 +6,12 @@
  */
 
 #include "NetComm.h"
-#include <strings.h>
+#include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
 #include "crc-16.h"
 
 NetComm::NetComm() {
@@ -24,6 +25,8 @@ NetComm::NetComm() {
     addr.sin_port = htons(NETCOMM_RECVPORT);
     bind(recvSock, (sockaddr*) &addr, sizeof(addr));
     fcntl(recvSock, F_SETFL, O_NONBLOCK);
+    bzero(&ifr, sizeof(ifr));
+    strcpy(ifr.ifr_name, "wlan0");
 }
 
 NetComm::~NetComm() {
@@ -57,4 +60,12 @@ bool NetComm::getData(ControlData* data) {
         data->dpadX = -1;
     }
     return true;
+}
+
+bool NetComm::isNetworkUp() {
+    if(ioctl(recvSock, SIOCGIFFLAGS, &ifr) != -1) {
+        int check_flags = IFF_UP | IFF_RUNNING;
+        return (ifr.ifr_flags & check_flags) == check_flags;
+    }
+    return false;
 }

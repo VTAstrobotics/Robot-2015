@@ -86,6 +86,17 @@ void motorControl(ControlData& data) {
     }
 }
 
+void check_ready() {
+    static bool led_set = false;
+    if(led_set) {
+        return;
+    }
+    if(comm.isNetworkUp()) {
+        led_set = true;
+        digitalWrite(READY_LED, HIGH);
+    }
+}
+
 void setup() {
     Serial.begin(9600);
     // Initialize default values for control
@@ -93,7 +104,6 @@ void setup() {
     // Activate LED to indicate readiness
     pinMode(READY_LED, OUTPUT);
     pinMode(ACTIVE_LED, OUTPUT);
-    digitalWrite(READY_LED, HIGH);
     // Initialize motor controllers
     RIGHT_DRIVE_CONTROLLER.attach(RIGHT_DRIVE_PIN);
     LEFT_DRIVE_CONTROLLER.attach(LEFT_DRIVE_PIN);
@@ -103,6 +113,7 @@ void setup() {
 }
 
 void loop() {
+    check_ready();
     if(comm.getData(&control)) {
         if(!dead) {
             printData(control);
