@@ -17,7 +17,7 @@ const int LEFT_DRIVE_PIN = 5;
 const int OFFSET_LEFT = -4;
 const int OFFSET_RIGHT = -4;
 const int OFFSET_DRUM = -6;
-const int OFFSET_ACTUATOR = -4;
+const int OFFSET_ACTUATOR = -5;
 
 Servo RIGHT_DRIVE_CONTROLLER;
 Servo LEFT_DRIVE_CONTROLLER;
