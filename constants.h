@@ -10,7 +10,7 @@
 
 // Motor values
 static const int SPEED_ACTUATOR_UP = 30;
-static const int SPEED_ACTUATOR_DOWN = 150;
+static const int SPEED_ACTUATOR_DOWN = 130;
 
 // Servo pins
 const int LEFT_DRIVE_PIN = 3;
