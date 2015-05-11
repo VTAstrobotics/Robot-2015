@@ -8,24 +8,19 @@ const int LOOP_HZ = 50;
 const int LOOP_DELAY = (int) (1000 / LOOP_HZ);
 const int READY_LED = 12;
 const int ACTIVE_LED = 11;
-const int RIGHT_DRIVE_PIN = 10;
-const int DRUM_PIN = 9;
-const int ACTUATOR_PIN = 6;
-const int LEFT_DRIVE_PIN = 3;
 
-Servo RIGHT_DRIVE_CONTROLLER;
-Servo LEFT_DRIVE_CONTROLLER;
-Servo ACTUATOR_CONTROLLER;
-Servo DRUM_CONTROLLER;
 NetComm comm;
 ControlData control;
 int speedL = 90;
 int speedR = 90;
 int speedDrum = 90;
 int speedActuator = 90;
-bool sendDrive = false;
-bool sendDrum = false;
 bool dead = true;
+
+Servo LEFT_DRIVE_CONTROLLER;
+Servo RIGHT_DRIVE_CONTROLLER;
+Servo DRUM_CONTROLLER;
+Servo ACTUATOR_CONTROLLER;
 
 void printData(ControlData& data) {
     char out[64];
@@ -39,12 +34,11 @@ void printData(ControlData& data) {
 
 void killMotors() {
     speedL = speedR = speedDrum = speedActuator = 90;
-    sendDrive = sendDrum = false;
-    RIGHT_DRIVE_CONTROLLER.write(speedR);
     LEFT_DRIVE_CONTROLLER.write(speedL);
-    ACTUATOR_CONTROLLER.write(speedActuator);
+    RIGHT_DRIVE_CONTROLLER.write(speedR);
     DRUM_CONTROLLER.write(speedDrum);
-  }
+    ACTUATOR_CONTROLLER.write(speedActuator);
+}
 
 void motorControl(ControlData& data) {
     // Update state
@@ -59,11 +53,14 @@ void motorControl(ControlData& data) {
     if(dead) {
         return;
     }
+
     if(data.id == DRIVE_LEFT || data.id == DRIVE_RIGHT) { //drivetrain
         if(data.id == DRIVE_LEFT) {
-            LEFT_DRIVE_CONTROLLER.write(data.val);
+            speedL = data.val;
+            LEFT_DRIVE_CONTROLLER.write(speedL);
         } else if(data.id == DRIVE_RIGHT) {
-            RIGHT_DRIVE_CONTROLLER.write(data.val);
+            speedR = data.val;
+            RIGHT_DRIVE_CONTROLLER.write(speedR);
         }
     }
 
@@ -71,23 +68,28 @@ void motorControl(ControlData& data) {
             || data.id == ACTUATOR_DOWN) { //Drum and Arm
         if(data.id == DUMP) { // Drum control
             // Assuming this one is 90-180 and drive is 90-0
-            DRUM_CONTROLLER.write(data.val);
+            speedDrum = data.val;
+            DRUM_CONTROLLER.write(speedDrum);
         } else if(data.id == DIG) {
-            DRUM_CONTROLLER.write(-data.val + 180);
+            speedDrum = -data.val + 180;
+            DRUM_CONTROLLER.write(speedDrum);
         } else if(data.id == ACTUATOR_UP || data.id == ACTUATOR_DOWN) { // Actuator control
             if(data.val == 0) { // Stopped pressing button
-                ACTUATOR_CONTROLLER.write(90);
+                speedActuator = 90;
+                ACTUATOR_CONTROLLER.write(speedActuator);
             } else if(data.id == ACTUATOR_UP) {
-                ACTUATOR_CONTROLLER.write(SPEED_ACTUATOR1_UP);
+                speedActuator = SPEED_ACTUATOR_UP;
+                ACTUATOR_CONTROLLER.write(speedActuator);
             } else if(data.id == ACTUATOR_DOWN) {
-                ACTUATOR_CONTROLLER.write(SPEED_ACTUATOR1_DOWN);
+                speedActuator = SPEED_ACTUATOR_DOWN;
+                ACTUATOR_CONTROLLER.write(speedActuator);
             }
         }
     }
 
     char out[64];
-    sprintf(out, "Drive left: %d, right: %d, Drum speed: %d", speedL, speedR,
-            speedDrum);
+    sprintf(out, "Drive left: %d, Right: %\tDrum rotation: %d, actuator: %d",
+            speedL, speedR, speedDrum, speedActuator);
     Serial.println(out);
 }
 
@@ -99,11 +101,13 @@ void setup() {
     pinMode(READY_LED, OUTPUT);
     pinMode(ACTIVE_LED, OUTPUT);
     digitalWrite(READY_LED, HIGH);
+    digitalWrite(ACTIVE_LED, !dead);
+    // Initialize motor controllers
+    LEFT_DRIVE_CONTROLLER.attach(LEFT_DRIVE_PIN);
     RIGHT_DRIVE_CONTROLLER.attach(RIGHT_DRIVE_PIN);
-    LEFT_DRIVE_CONTROLLER.attach(LEFT_DRIVE_PIN);    
-    ACTUATOR_CONTROLLER.attach(ACTUATOR_PIN);
     DRUM_CONTROLLER.attach(DRUM_PIN);
-  }
+    ACTUATOR_CONTROLLER.attach(ACTUATOR_PIN);
+}
 
 void loop() {
     if(comm.getData(&control)) {

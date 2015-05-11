@@ -9,10 +9,14 @@
 #define CONSTANTS_H_
 
 // Motor values
-static const int SPEED_ACTUATOR1_UP = 30;
-static const int SPEED_ACTUATOR1_DOWN = 150;
-static const int SPEED_ACTUATOR2_UP = 30;
-static const int SPEED_ACTUATOR2_DOWN = 150;
+static const int SPEED_ACTUATOR_UP = 30;
+static const int SPEED_ACTUATOR_DOWN = 150;
+
+// Servo pins
+const int LEFT_DRIVE_PIN = 3;
+const int RIGHT_DRIVE_PIN = 10;
+const int DRUM_PIN = 9;
+const int ACTUATOR_PIN = 6;
 
 // Xbox controller IDs
 static const int LTHUMBX = 0;
@@ -47,9 +51,5 @@ static const int ACTUATOR_UP = Y;
 static const int ACTUATOR_DOWN = A;
 static const int KILL_ALL = BACK;
 static const int DEADMAN = LB;
-
-// I2C addresses
-static const int ADDR_DRIVE_SLAVE = 1;
-static const int ADDR_DRUM_SLAVE = 2;
 
 #endif /* CONSTANTS_H_ */
