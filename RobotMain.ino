@@ -8,6 +8,8 @@ const int LOOP_HZ = 50;
 const int LOOP_DELAY = (int) (1000 / LOOP_HZ);
 const int READY_LED = 12;
 const int ACTIVE_LED = 11;
+
+// Motor controllers
 const int RIGHT_DRIVE_PIN = 10;
 const int DRUM_PIN = 9;
 const int ACTUATOR_PIN = 6;
@@ -36,11 +38,11 @@ void printData(ControlData& data) {
 }
 
 void killMotors() {
-    RIGHT_DRIVE_CONTROLLER.write(90+OFFSET_RIGHT);
-    LEFT_DRIVE_CONTROLLER.write(90+OFFSET_LEFT);
-    ACTUATOR_CONTROLLER.write(90+OFFSET_ACTUATOR);
-    DRUM_CONTROLLER.write(90+OFFSET_DRUM);
-  }
+    RIGHT_DRIVE_CONTROLLER.write(90 + OFFSET_RIGHT);
+    LEFT_DRIVE_CONTROLLER.write(90 + OFFSET_LEFT);
+    ACTUATOR_CONTROLLER.write(90 + OFFSET_ACTUATOR);
+    DRUM_CONTROLLER.write(90 + OFFSET_DRUM);
+}
 
 void motorControl(ControlData& data) {
     // Update state
@@ -57,9 +59,9 @@ void motorControl(ControlData& data) {
     }
     if(data.id == DRIVE_LEFT || data.id == DRIVE_RIGHT) { //drivetrain
         if(data.id == DRIVE_LEFT) {
-            LEFT_DRIVE_CONTROLLER.write(data.val+OFFSET_LEFT);
+            LEFT_DRIVE_CONTROLLER.write(data.val + OFFSET_LEFT);
         } else if(data.id == DRIVE_RIGHT) {
-            RIGHT_DRIVE_CONTROLLER.write(data.val+OFFSET_RIGHT);
+            RIGHT_DRIVE_CONTROLLER.write(data.val + OFFSET_RIGHT);
         }
     }
 
@@ -67,20 +69,20 @@ void motorControl(ControlData& data) {
             || data.id == ACTUATOR_DOWN) { //Drum and Arm
         if(data.id == DUMP) { // Drum control
             // Assuming this one is 90-180 and drive is 90-0
-            DRUM_CONTROLLER.write(data.val+OFFSET_DRUM);
+            DRUM_CONTROLLER.write(data.val + OFFSET_DRUM);
         } else if(data.id == DIG) {
-            DRUM_CONTROLLER.write(-data.val + 180+OFFSET_DRUM);
+            DRUM_CONTROLLER.write(-data.val + 180 + OFFSET_DRUM);
         } else if(data.id == ACTUATOR_UP || data.id == ACTUATOR_DOWN) { // Actuator control
             if(data.val == 0) { // Stopped pressing button
-                ACTUATOR_CONTROLLER.write(90+OFFSET_ACTUATOR);
-            } else{ 
-            if(data.id == ACTUATOR_UP) {
-                ACTUATOR_CONTROLLER.write(SPEED_ACTUATOR_UP);
-            } else if(data.id == ACTUATOR_DOWN) {
-                ACTUATOR_CONTROLLER.write(SPEED_ACTUATOR_DOWN);
+                ACTUATOR_CONTROLLER.write(90 + OFFSET_ACTUATOR);
+            } else {
+                if(data.id == ACTUATOR_UP) {
+                    ACTUATOR_CONTROLLER.write(SPEED_ACTUATOR_UP);
+                } else if(data.id == ACTUATOR_DOWN) {
+                    ACTUATOR_CONTROLLER.write(SPEED_ACTUATOR_DOWN);
+                }
             }
-            }
-          }
+        }
     }
 }
 
@@ -92,8 +94,9 @@ void setup() {
     pinMode(READY_LED, OUTPUT);
     pinMode(ACTIVE_LED, OUTPUT);
     digitalWrite(READY_LED, HIGH);
+    // Initialize motor controllers
     RIGHT_DRIVE_CONTROLLER.attach(RIGHT_DRIVE_PIN);
-    LEFT_DRIVE_CONTROLLER.attach(LEFT_DRIVE_PIN);    
+    LEFT_DRIVE_CONTROLLER.attach(LEFT_DRIVE_PIN);
     ACTUATOR_CONTROLLER.attach(ACTUATOR_PIN);
     DRUM_CONTROLLER.attach(DRUM_PIN);
     killMotors();
