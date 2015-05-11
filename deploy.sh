@@ -8,4 +8,5 @@ echo "Stopping sketch process..."
 echo 'killall sketch.elf' | $SSHCMD
 echo "Sending new sketch..."
 scp Release/Robot-2015.elf root@10.0.0.30:/sketch/sketch.elf
-echo "Done, press the reset button on the board"
+echo "Done"
+echo "The board must now be manually rebooted (not reset)."
