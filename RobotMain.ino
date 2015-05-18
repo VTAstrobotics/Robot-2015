@@ -57,41 +57,35 @@ void motorControl(ControlData& data) {
     if(dead) {
         return;
     }
-    if(data.id == DRIVE_LEFT || data.id == DRIVE_RIGHT) { // Drivetrain
-        if(data.id == DRIVE_LEFT) {
-            LEFT_DRIVE_CONTROLLER.write(data.val + OFFSET_LEFT);
-        } else if(data.id == DRIVE_RIGHT) {
-            RIGHT_DRIVE_CONTROLLER.write(data.val + OFFSET_RIGHT);
-        }
-    }
 
-    else if(data.id == DIG || data.id == DUMP || data.id == ACTUATOR_UP
-            || data.id == ACTUATOR_DOWN || data.id == DIG_BTN
-            || data.id == DUMP_BTN) { // Drum and Arm
-        if(data.id == DUMP) { // Drum control
-            // Assuming this one is 90-180 and dig is 90-0
-            DRUM_CONTROLLER.write(data.val + OFFSET_DRUM);
-        } else if(data.id == DIG) {
-            DRUM_CONTROLLER.write(-data.val + 180 + OFFSET_DRUM);
-        } else if(data.id == DUMP_BTN || data.id == DIG_BTN) { // Drum control when using non-Xbox controllers
-            if(data.val == 0) {
-                DRUM_CONTROLLER.write(90 + OFFSET_DRUM);
-            } else {
-                if(data.id == DUMP_BTN) {
-                    DRUM_CONTROLLER.write(SPEED_DUMP_BTN + OFFSET_DRUM);
-                } else if(data.id == DIG_BTN) {
-                    DRUM_CONTROLLER.write(SPEED_DIG_BTN + OFFSET_DRUM);
-                }
+    if(data.id == DRIVE_LEFT) {
+        LEFT_DRIVE_CONTROLLER.write(data.val + OFFSET_LEFT);
+    } else if(data.id == DRIVE_RIGHT) {
+        RIGHT_DRIVE_CONTROLLER.write(data.val + OFFSET_RIGHT);
+    } else if(data.id == DUMP) { // Drum control
+        // Assuming this one is 90-180 and dig is 90-0
+        DRUM_CONTROLLER.write(data.val + OFFSET_DRUM);
+    } else if(data.id == DIG) {
+        DRUM_CONTROLLER.write(-data.val + 180 + OFFSET_DRUM);
+    } else if(data.id == DUMP_BTN || data.id == DIG_BTN) { // Drum control when using non-Xbox controllers
+        if(data.val == 0) {
+            DRUM_CONTROLLER.write(90 + OFFSET_DRUM);
+        } else {
+            if(data.id == DUMP_BTN) {
+                DRUM_CONTROLLER.write(SPEED_DUMP_BTN + OFFSET_DRUM);
+            } else if(data.id == DIG_BTN) {
+                DRUM_CONTROLLER.write(SPEED_DIG_BTN + OFFSET_DRUM);
             }
-        } else if(data.id == ACTUATOR_UP || data.id == ACTUATOR_DOWN) { // Actuator control
-            if(data.val == 0) { // Stopped pressing button
-                ACTUATOR_CONTROLLER.write(90 + OFFSET_ACTUATOR);
-            } else {
-                if(data.id == ACTUATOR_UP) {
-                    ACTUATOR_CONTROLLER.write(SPEED_ACTUATOR_UP + OFFSET_ACTUATOR);
-                } else if(data.id == ACTUATOR_DOWN) {
-                    ACTUATOR_CONTROLLER.write(SPEED_ACTUATOR_DOWN + OFFSET_ACTUATOR);
-                }
+        }
+    } else if(data.id == ACTUATOR_UP || data.id == ACTUATOR_DOWN) { // Actuator control
+        if(data.val == 0) { // Stopped pressing button
+            ACTUATOR_CONTROLLER.write(90 + OFFSET_ACTUATOR);
+        } else {
+            if(data.id == ACTUATOR_UP) {
+                ACTUATOR_CONTROLLER.write(SPEED_ACTUATOR_UP + OFFSET_ACTUATOR);
+            } else if(data.id == ACTUATOR_DOWN) {
+                ACTUATOR_CONTROLLER.write(
+                        SPEED_ACTUATOR_DOWN + OFFSET_ACTUATOR);
             }
         }
     }
