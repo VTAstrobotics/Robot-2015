@@ -1,8 +1,8 @@
 #include "NetComm.h"
-#include "constants.h"
 #include "crc-16.h"
 #include <Servo.h>
 #include <Arduino.h>
+#include "common.h"
 
 const int LOOP_HZ = 50;
 const int LOOP_DELAY = (int) (1000 / LOOP_HZ);
@@ -26,6 +26,8 @@ Servo DRUM_CONTROLLER;
 NetComm comm;
 ControlData control;
 bool dead = true;
+bool drumInc = false;
+double drumIncStart = 0.0;
 
 void printData(ControlData& data) {
     char out[64];
@@ -42,6 +44,7 @@ void killMotors() {
     LEFT_DRIVE_CONTROLLER.write(90 + OFFSET_LEFT);
     ACTUATOR_CONTROLLER.write(90 + OFFSET_ACTUATOR);
     DRUM_CONTROLLER.write(90 + OFFSET_DRUM);
+    drumInc = false;
 }
 
 void motorControl(ControlData& data) {
@@ -58,6 +61,12 @@ void motorControl(ControlData& data) {
         return;
     }
 
+    // If in drum increment mode and time for increment has passed
+    if(drumInc && getCurrentSeconds() - drumIncStart > DRUM_INC_TIME) {
+        DRUM_CONTROLLER.write(90 + OFFSET_DRUM);
+        drumInc = false;
+    }
+
     if(data.id == DRIVE_LEFT) {
         LEFT_DRIVE_CONTROLLER.write(data.val + OFFSET_LEFT);
     } else if(data.id == DRIVE_RIGHT) {
@@ -65,8 +74,10 @@ void motorControl(ControlData& data) {
     } else if(data.id == DUMP) { // Drum control
         // Assuming this one is 90-180 and dig is 90-0
         DRUM_CONTROLLER.write(data.val + OFFSET_DRUM);
+        drumInc = false;
     } else if(data.id == DIG) {
         DRUM_CONTROLLER.write(-data.val + 180 + OFFSET_DRUM);
+        drumInc = false;
     } else if(data.id == DUMP_BTN || data.id == DIG_BTN) { // Drum control when using non-Xbox controllers
         if(data.val == 0) {
             DRUM_CONTROLLER.write(90 + OFFSET_DRUM);
@@ -88,6 +99,9 @@ void motorControl(ControlData& data) {
                         SPEED_ACTUATOR_DOWN + OFFSET_ACTUATOR);
             }
         }
+    } else if(data.id == DRUM_INCREMENT && data.val == 1) {
+        drumInc = true;
+        drumIncStart = getCurrentSeconds();
     }
 }
 
