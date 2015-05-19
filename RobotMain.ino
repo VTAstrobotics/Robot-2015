@@ -3,6 +3,7 @@
 #include "crc-16.h"
 #include <Servo.h>
 #include <Arduino.h>
+#include <NetworkSerial.h>
 
 const int LOOP_HZ = 50;
 const int LOOP_DELAY = (int) (1000 / LOOP_HZ);
@@ -27,6 +28,9 @@ NetComm comm;
 ControlData control;
 bool dead = true;
 
+NetworkSerial SerialNet;
+#define SerialOut SerialNet
+
 void printData(ControlData& data) {
     char out[64];
     if(data.id == 17) {
@@ -34,7 +38,7 @@ void printData(ControlData& data) {
     } else {
         sprintf(out, "Data update, id: %d, value: %d", data.id, data.val);
     }
-    Serial.println(out);
+    SerialOut.println(out);
 }
 
 void killMotors() {
@@ -103,7 +107,7 @@ void check_ready() {
 }
 
 void setup() {
-    Serial.begin(9600);
+    SerialOut.begin(9600);
     // Initialize default values for control
     bzero(&control, sizeof(control));
     // Activate LED to indicate readiness
@@ -126,7 +130,7 @@ void loop() {
         motorControl(control);
     } else {
         if(dead) {
-            Serial.println("dead");
+            SerialOut.println("dead");
         }
         delay(LOOP_DELAY);
     }
