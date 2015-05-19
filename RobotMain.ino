@@ -10,10 +10,10 @@ const int READY_LED = 12;
 const int ACTIVE_LED = 11;
 
 // Motor controllers
-const int RIGHT_DRIVE_PIN = 10;
+const int RIGHT_DRIVE_PIN = 5;
 const int DRUM_PIN = 9;
 const int ACTUATOR_PIN = 6;
-const int LEFT_DRIVE_PIN = 5;
+const int LEFT_DRIVE_PIN = 10;
 const int OFFSET_LEFT = -4;
 const int OFFSET_RIGHT = -4;
 const int OFFSET_DRUM = -6;
