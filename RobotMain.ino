@@ -61,12 +61,6 @@ void motorControl(ControlData& data) {
         return;
     }
 
-    // If in drum increment mode and time for increment has passed
-    if(drumInc && getCurrentSeconds() - drumIncStart > DRUM_INC_TIME) {
-        DRUM_CONTROLLER.write(90 + OFFSET_DRUM);
-        drumInc = false;
-    }
-
     if(data.id == DRIVE_LEFT) {
         LEFT_DRIVE_CONTROLLER.write(data.val + OFFSET_LEFT);
     } else if(data.id == DRIVE_RIGHT) {
@@ -74,10 +68,8 @@ void motorControl(ControlData& data) {
     } else if(data.id == DUMP) { // Drum control
         // Assuming this one is 90-180 and dig is 90-0
         DRUM_CONTROLLER.write(data.val + OFFSET_DRUM);
-        drumInc = false;
     } else if(data.id == DIG) {
         DRUM_CONTROLLER.write(-data.val + 180 + OFFSET_DRUM);
-        drumInc = false;
     } else if(data.id == DUMP_BTN || data.id == DIG_BTN) { // Drum control when using non-Xbox controllers
         if(data.val == 0) {
             DRUM_CONTROLLER.write(90 + OFFSET_DRUM);
@@ -98,10 +90,20 @@ void motorControl(ControlData& data) {
                 ACTUATOR_CONTROLLER.write(
                         SPEED_ACTUATOR_DOWN + OFFSET_ACTUATOR);
             }
+            drumInc = false;
         }
     } else if(data.id == DRUM_INCREMENT && data.val == 1) {
+        ACTUATOR_CONTROLLER.write(SPEED_DRUM_INC + OFFSET_ACTUATOR);
         drumInc = true;
         drumIncStart = getCurrentSeconds();
+    }
+}
+
+void drumIncrementControl() {
+    // If in drum increment mode and time for increment has passed
+    if(drumInc && getCurrentSeconds() - drumIncStart > DRUM_INC_TIME) {
+        ACTUATOR_CONTROLLER.write(90 + OFFSET_ACTUATOR);
+        drumInc = false;
     }
 }
 
@@ -133,6 +135,7 @@ void setup() {
 
 void loop() {
     check_ready();
+    drumIncrementControl();
     if(comm.getData(&control)) {
         if(!dead) {
             printData(control);
