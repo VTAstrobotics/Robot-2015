@@ -16,7 +16,7 @@ static const int SPEED_ACTUATOR_DOWN = 130;
 static const int SPEED_DUMP_BTN      = 135;
 static const int SPEED_DIG_BTN       = 45;
 static const int SPEED_DRUM_INC      = SPEED_ACTUATOR_DOWN;
-static const double DRUM_INC_TIME    = 0.35;
+static const double DRUM_INC_TIME    = 0.25;
 
 // Xbox controller IDs
 static const int LTHUMBX   = 0;
