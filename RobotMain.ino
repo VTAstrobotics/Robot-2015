@@ -2,6 +2,7 @@
 #include "crc-16.h"
 #include <Servo.h>
 #include <Arduino.h>
+#include <Astrobotics_Shield_Header.h>
 #include "common.h"
 
 const int LOOP_HZ = 50;
@@ -10,24 +11,14 @@ const int READY_LED = 12;
 const int ACTIVE_LED = 11;
 
 // Motor controllers
-const int RIGHT_DRIVE_PIN = 5;
-const int DRUM_PIN = 9;
-const int ACTUATOR_PIN = 6;
-const int LEFT_DRIVE_PIN = 10;
-const int OFFSET_LEFT = -4;
-const int OFFSET_RIGHT = -4;
-const int OFFSET_DRUM = -6;
-const int OFFSET_ACTUATOR = -5;
+const int RIGHT_DRIVE_PIN = 0;
+const int LEFT_DRIVE_PIN = 1;
 
-Servo RIGHT_DRIVE_CONTROLLER;
-Servo LEFT_DRIVE_CONTROLLER;
-Servo ACTUATOR_CONTROLLER;
-Servo DRUM_CONTROLLER;
+PWMTalon RIGHT_DRIVE_CONTROLLER;
+PWMTalon LEFT_DRIVE_CONTROLLER;
 NetComm comm;
 ControlData control;
 bool dead = true;
-bool drumInc = false;
-double drumIncStart = 0.0;
 
 void printData(ControlData& data) {
     char out[64];
@@ -40,11 +31,8 @@ void printData(ControlData& data) {
 }
 
 void killMotors() {
-    RIGHT_DRIVE_CONTROLLER.write(90 + OFFSET_RIGHT);
-    LEFT_DRIVE_CONTROLLER.write(90 + OFFSET_LEFT);
-    ACTUATOR_CONTROLLER.write(90 + OFFSET_ACTUATOR);
-    DRUM_CONTROLLER.write(90 + OFFSET_DRUM);
-    drumInc = false;
+    RIGHT_DRIVE_CONTROLLER.set_speed(0.0f);
+    LEFT_DRIVE_CONTROLLER.set_speed(0.0f);
 }
 
 void motorControl(ControlData& data) {
@@ -62,48 +50,17 @@ void motorControl(ControlData& data) {
     }
 
     if(data.id == DRIVE_LEFT) {
-        LEFT_DRIVE_CONTROLLER.write(data.val + OFFSET_LEFT);
+        float speed = (data.val - 90) / 90.0f;
+        char out[64];
+        sprintf(out, "Left value: %f", speed);
+        Serial.println(out);
+        LEFT_DRIVE_CONTROLLER.set_speed(speed);
     } else if(data.id == DRIVE_RIGHT) {
-        RIGHT_DRIVE_CONTROLLER.write(data.val + OFFSET_RIGHT);
-    } else if(data.id == DUMP) { // Drum control
-        // Assuming this one is 90-180 and dig is 90-0
-        DRUM_CONTROLLER.write(data.val + OFFSET_DRUM);
-    } else if(data.id == DIG) {
-        DRUM_CONTROLLER.write(-data.val + 180 + OFFSET_DRUM);
-    } else if(data.id == DUMP_BTN || data.id == DIG_BTN) { // Drum control when using non-Xbox controllers
-        if(data.val == 0) {
-            DRUM_CONTROLLER.write(90 + OFFSET_DRUM);
-        } else {
-            if(data.id == DUMP_BTN) {
-                DRUM_CONTROLLER.write(SPEED_DUMP_BTN + OFFSET_DRUM);
-            } else if(data.id == DIG_BTN) {
-                DRUM_CONTROLLER.write(SPEED_DIG_BTN + OFFSET_DRUM);
-            }
-        }
-    } else if(data.id == ACTUATOR_UP || data.id == ACTUATOR_DOWN) { // Actuator control
-        if(data.val == 0) { // Stopped pressing button
-            ACTUATOR_CONTROLLER.write(90 + OFFSET_ACTUATOR);
-        } else {
-            if(data.id == ACTUATOR_UP) {
-                ACTUATOR_CONTROLLER.write(SPEED_ACTUATOR_UP + OFFSET_ACTUATOR);
-            } else if(data.id == ACTUATOR_DOWN) {
-                ACTUATOR_CONTROLLER.write(
-                        SPEED_ACTUATOR_DOWN + OFFSET_ACTUATOR);
-            }
-            drumInc = false;
-        }
-    } else if(data.id == DRUM_INCREMENT && data.val == 1) {
-        ACTUATOR_CONTROLLER.write(SPEED_DRUM_INC + OFFSET_ACTUATOR);
-        drumInc = true;
-        drumIncStart = getCurrentSeconds();
-    }
-}
-
-void drumIncrementControl() {
-    // If in drum increment mode and time for increment has passed
-    if(drumInc && getCurrentSeconds() - drumIncStart > DRUM_INC_TIME) {
-        ACTUATOR_CONTROLLER.write(90 + OFFSET_ACTUATOR);
-        drumInc = false;
+        float speed = (data.val - 90) / 90.0f;
+        char out[64];
+        sprintf(out, "Right value: %f", speed);
+        Serial.println(out);
+        RIGHT_DRIVE_CONTROLLER.set_speed(speed);
     }
 }
 
@@ -126,16 +83,14 @@ void setup() {
     pinMode(READY_LED, OUTPUT);
     pinMode(ACTIVE_LED, OUTPUT);
     // Initialize motor controllers
+    PWMTalon::talon_init();
+    LEFT_DRIVE_CONTROLLER.attach(LEFT_DRIVE_PIN, true);
     RIGHT_DRIVE_CONTROLLER.attach(RIGHT_DRIVE_PIN);
-    LEFT_DRIVE_CONTROLLER.attach(LEFT_DRIVE_PIN);
-    ACTUATOR_CONTROLLER.attach(ACTUATOR_PIN);
-    DRUM_CONTROLLER.attach(DRUM_PIN);
     killMotors();
 }
 
 void loop() {
     check_ready();
-    drumIncrementControl();
     if(comm.getData(&control)) {
         if(!dead) {
             printData(control);
