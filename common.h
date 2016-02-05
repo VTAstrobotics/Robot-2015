@@ -11,12 +11,8 @@
 #include <time.h>
 
 // Motor and misc values
-static const int SPEED_ACTUATOR_UP   = 30;
-static const int SPEED_ACTUATOR_DOWN = 130;
-static const int SPEED_DUMP_BTN      = 135;
-static const int SPEED_DIG_BTN       = 45;
-static const int SPEED_DRUM_INC      = SPEED_ACTUATOR_DOWN;
-static const double DRUM_INC_TIME    = 0.25;
+static const float SPEED_ACTUATOR_UP   = 1.0f;
+static const float SPEED_ACTUATOR_DOWN = -1.0f;
 
 // Xbox controller IDs
 static const int LTHUMBX   = 0;
@@ -45,17 +41,14 @@ static const int R2        = 19;
 // Axes
 static const int DRIVE_LEFT  = LTHUMBY;
 static const int DRIVE_RIGHT = RTHUMBY;
-static const int DUMP        = LTRIGGER;
-static const int DIG         = RTRIGGER;
 // Buttons
 static const int DRIVE_LEFT_STOP  = LTHUMBBTN;
 static const int DRIVE_RIGHT_STOP = RTHUMBBTN;
-static const int DUMP_BTN         = L2;
-static const int DIG_BTN          = R2;
-static const int ACTUATOR_UP      = Y;
-static const int ACTUATOR_DOWN    = A;
+static const int ACTUATOR1_UP     = Y;
+static const int ACTUATOR1_DOWN   = A;
+static const int ACTUATOR2_UP     = B;
+static const int ACTUATOR2_DOWN   = X;
 static const int DEADMAN          = LB;
-static const int DRUM_INCREMENT   = RB;
 
 // Helper functions
 inline double getSeconds(timespec time) {
