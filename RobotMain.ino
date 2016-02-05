@@ -33,6 +33,7 @@ void printData(ControlData& data) {
 void killMotors() {
     RIGHT_DRIVE_CONTROLLER.set_speed(0.0f);
     LEFT_DRIVE_CONTROLLER.set_speed(0.0f);
+    dead = true;
 }
 
 void motorControl(ControlData& data) {
@@ -64,14 +65,13 @@ void motorControl(ControlData& data) {
     }
 }
 
-void check_ready() {
-    static bool led_set = false;
-    if(led_set) {
-        return;
-    }
+void check_connected() {
     if(comm.isNetworkUp()) {
-        led_set = true;
         digitalWrite(READY_LED, HIGH);
+    } else {
+        Serial.println("Ping timed out!");
+        digitalWrite(READY_LED, LOW);
+        killMotors();
     }
 }
 
@@ -90,7 +90,7 @@ void setup() {
 }
 
 void loop() {
-    check_ready();
+    check_connected();
     if(comm.getData(&control)) {
         if(!dead) {
             printData(control);

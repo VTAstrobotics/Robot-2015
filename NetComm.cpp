@@ -13,18 +13,28 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include "crc-16.h"
+#include "common.h"
 
-NetComm::NetComm() {
-    recvSock = socket(AF_INET, SOCK_DGRAM, 0);
+inline int bindSocket(int port) {
+    int sock = socket(AF_INET, SOCK_DGRAM, 0);
     int reuse = 1;
-    setsockopt(recvSock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
     sockaddr_in addr;
     bzero(&addr, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    addr.sin_port = htons(NETCOMM_RECVPORT);
-    bind(recvSock, (sockaddr*) &addr, sizeof(addr));
-    fcntl(recvSock, F_SETFL, O_NONBLOCK);
+    addr.sin_port = htons(port);
+    bind(sock, (sockaddr*) &addr, sizeof(addr));
+    fcntl(sock, F_SETFL, O_NONBLOCK);
+    return sock;
+}
+
+NetComm::NetComm() : pingReceived(true), lastPingTime(getCurrentSeconds()) {
+    // Initialize sockets
+    recvSock = bindSocket(NETCOMM_RECVPORT);
+    pingSock = bindSocket(NETCOMM_PINGPORT);
+
+    // Initalize network interface structure
     bzero(&ifr, sizeof(ifr));
     strcpy(ifr.ifr_name, "wlan0");
 }
@@ -63,9 +73,30 @@ bool NetComm::getData(ControlData* data) {
 }
 
 bool NetComm::isNetworkUp() {
+    // Check interface status first
     if(ioctl(recvSock, SIOCGIFFLAGS, &ifr) != -1) {
         int check_flags = IFF_UP | IFF_RUNNING;
-        return (ifr.ifr_flags & check_flags) == check_flags;
+        if((ifr.ifr_flags & check_flags) != check_flags) {
+            return false;
+        }
     }
-    return false;
+
+#if PING_ENABLED
+    // Check if last ping was received
+    PingData pingData;
+    int size = sizeof(PingData);
+    bzero(&pingData, size);
+    int len = recvfrom(pingSock, &pingData, size, 0, NULL, NULL);
+    if(len == size && pingData.pingValue == NETCOMM_PINGVALUE) {
+        // Ping respond is valid, so return true
+        pingReceived = true;
+        lastPingTime = getCurrentSeconds();
+    } else if(getCurrentSeconds() - lastPingTime >= PING_TIMEOUT) {
+        // Ping timed out, so return false
+        pingReceived = false;
+    }
+#endif
+
+    // Return last status of ping
+    return pingReceived;
 }

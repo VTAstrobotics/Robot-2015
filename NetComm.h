@@ -11,7 +11,12 @@
 #include <stdint.h>
 #include <net/if.h>
 
+#define PING_ENABLED 0
+
 const int NETCOMM_RECVPORT = 6800;
+const int NETCOMM_PINGPORT = 6900;
+const int NETCOMM_PINGVALUE = 216;
+const double PING_TIMEOUT = 3;     // in seconds
 
 // Little-endian on Galileo (x86)
 /*struct __attribute__((__packed__)) Joystick {
@@ -47,6 +52,10 @@ struct __attribute__((__packed__)) CommData {
     uint16_t crc16;
 };
 
+struct __attribute__((__packed__)) PingData {
+    uint8_t pingValue;
+};
+
 struct ControlData {
     uint8_t id;
     uint8_t val;
@@ -64,7 +73,14 @@ public:
 
 private:
     int recvSock;
+
+    int pingSock;
+    bool pingReceived;
+    double lastPingTime;
+
     ifreq ifr; // For detecting if network interface is up
+
+    void sendPing();
 };
 
 #endif /* ROBOT_2015_NETCOMM_H_ */
