@@ -12,10 +12,15 @@ const int ACTIVE_LED = 11;
 
 // Motor controllers
 const int RIGHT_DRIVE_PIN = 0;
-const int LEFT_DRIVE_PIN = 1;
+const int LEFT_DRIVE_PIN  = 1;
+const int ACTUATOR1A_PIN  = 2; // TODO fix these
+const int ACTUATOR1B_PIN  = 3;
+const int ACTUATOR2_PIN   = 4;
 
 PWMTalon RIGHT_DRIVE_CONTROLLER;
 PWMTalon LEFT_DRIVE_CONTROLLER;
+PWMTalon ACTUATOR1_CONTROLLER;
+PWMTalon ACTUATOR2_CONTROLLER;
 NetComm comm;
 ControlData control;
 bool dead = true;
@@ -62,6 +67,22 @@ void motorControl(ControlData& data) {
         sprintf(out, "Right value: %f", speed);
         Serial.println(out);
         RIGHT_DRIVE_CONTROLLER.set_speed(speed);
+    } else if(data.id == ACTUATOR1_UP || data.id == ACTUATOR1_DOWN) {
+        if(data.val && data.id == ACTUATOR1_UP) {
+            ACTUATOR1_CONTROLLER.set_speed(SPEED_ACTUATOR_UP);
+        } else if(data.val && data.id == ACTUATOR1_DOWN) {
+            ACTUATOR1_CONTROLLER.set_speed(SPEED_ACTUATOR_DOWN);
+        } else {
+            ACTUATOR1_CONTROLLER.set_speed(0.0f);
+        }
+    } else if(data.id == ACTUATOR2_UP || data.id == ACTUATOR2_DOWN) {
+        if(data.val && data.id == ACTUATOR2_UP) {
+            ACTUATOR2_CONTROLLER.set_speed(SPEED_ACTUATOR_UP);
+        } else if(data.val && data.id == ACTUATOR2_DOWN) {
+            ACTUATOR2_CONTROLLER.set_speed(SPEED_ACTUATOR_DOWN);
+        } else {
+            ACTUATOR2_CONTROLLER.set_speed(0.0f);
+        }
     }
 }
 
@@ -86,6 +107,8 @@ void setup() {
     PWMTalon::talon_init();
     LEFT_DRIVE_CONTROLLER.attach(LEFT_DRIVE_PIN, true);
     RIGHT_DRIVE_CONTROLLER.attach(RIGHT_DRIVE_PIN);
+    ACTUATOR1_CONTROLLER.attach(ACTUATOR1A_PIN);
+    ACTUATOR2_CONTROLLER.attach(ACTUATOR2_PIN);
     killMotors();
 }
 
