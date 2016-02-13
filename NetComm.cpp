@@ -22,7 +22,7 @@ inline int bindSocket(int port) {
     sockaddr_in addr;
     bzero(&addr, sizeof(addr));
     addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr.sin_addr.s_addr = htonl(INADDR_ANY); // 0.0.0.0
     addr.sin_port = htons(port);
     bind(sock, (sockaddr*) &addr, sizeof(addr));
     fcntl(sock, F_SETFL, O_NONBLOCK);

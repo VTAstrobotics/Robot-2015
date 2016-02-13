@@ -11,8 +11,9 @@
 #include <time.h>
 
 // Motor and misc values
-static const float SPEED_ACTUATOR_UP   = 1.0f;
-static const float SPEED_ACTUATOR_DOWN = -1.0f;
+static const float SPEED_ACTUATOR1_UP   =  1.0f;
+static const float SPEED_ACTUATOR1_DOWN = -1.0f;
+static const float SPEED_ACTUATOR2      =  0.75f;
 
 // Xbox controller IDs
 static const int LTHUMBX   = 0;
@@ -39,15 +40,15 @@ static const int R2        = 19;
 
 // Specific controls
 // Axes
-static const int DRIVE_LEFT  = LTHUMBY;
-static const int DRIVE_RIGHT = RTHUMBY;
+static const int DRIVE_LEFT     = LTHUMBY;
+static const int DRIVE_RIGHT    = RTHUMBY;
+static const int ACTUATOR2_UP   = RTRIGGER;
+static const int ACTUATOR2_DOWN = LTRIGGER;
 // Buttons
 static const int DRIVE_LEFT_STOP  = LTHUMBBTN;
 static const int DRIVE_RIGHT_STOP = RTHUMBBTN;
 static const int ACTUATOR1_UP     = Y;
 static const int ACTUATOR1_DOWN   = A;
-static const int ACTUATOR2_UP     = B;
-static const int ACTUATOR2_DOWN   = X;
 static const int DEADMAN          = LB;
 
 // Helper functions
