@@ -40,15 +40,17 @@ static const int R2        = 19;
 
 // Specific controls
 // Axes
-static const int DRIVE_LEFT     = LTHUMBY;
-static const int DRIVE_RIGHT    = RTHUMBY;
-static const int ACTUATOR2_UP   = RTRIGGER;
-static const int ACTUATOR2_DOWN = LTRIGGER;
+static const int DRIVE_LEFT       = LTHUMBY;
+static const int DRIVE_RIGHT      = RTHUMBY;
+static const int ACTUATOR2_UP_T   = RTRIGGER;
+static const int ACTUATOR2_DOWN_T = LTRIGGER;
 // Buttons
 static const int DRIVE_LEFT_STOP  = LTHUMBBTN;
 static const int DRIVE_RIGHT_STOP = RTHUMBBTN;
 static const int ACTUATOR1_UP     = Y;
 static const int ACTUATOR1_DOWN   = A;
+static const int ACTUATOR2_UP_B   = B;
+static const int ACTUATOR2_DOWN_B = X;
 static const int DEADMAN          = LB;
 
 // Helper functions

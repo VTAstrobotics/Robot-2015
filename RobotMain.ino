@@ -76,12 +76,20 @@ void motorControl(ControlData& data) {
             ACTUATOR1A_CONTROLLER.set_speed(0.0f);
             ACTUATOR1B_CONTROLLER.set_speed(0.0f);
         }
-    } else if(data.id == ACTUATOR2_UP || data.id == ACTUATOR2_DOWN) {
+    } else if(data.id == ACTUATOR2_UP_T || data.id == ACTUATOR2_DOWN_T) {
         float speed = (data.val - 90) / 90.0f;
-        if(data.id == ACTUATOR2_DOWN) {
+        if(data.id == ACTUATOR2_DOWN_T) {
             speed *= -1.0f;
         }
         ACTUATOR2_CONTROLLER.set_speed(speed * SPEED_ACTUATOR2);
+    } else if(data.id == ACTUATOR2_UP_B || data.id == ACTUATOR2_DOWN_B) {
+        if(data.val && data.id == ACTUATOR2_UP_B) {
+            ACTUATOR2_CONTROLLER.set_speed(SPEED_ACTUATOR2);
+        } else if(data.val && data.id == ACTUATOR2_DOWN_B) {
+            ACTUATOR2_CONTROLLER.set_speed(-SPEED_ACTUATOR2);
+        } else {
+            ACTUATOR2_CONTROLLER.set_speed(0.0f);
+        }
     }
 }
 
